@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuration WiFi</title>
+</head>
+
+<body>
+    <style>
+        @import url('https://fonts.googleapis.com/css?family=Montserrat:400,700|Roboto:400,700');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', 'Roboto', Tahoma, Verdana, sans-serif;
+            background: linear-gradient(90deg, #00B292, #7ED957);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #FFF;
+            padding: 30px 20px;
+        }
+
+        h1 {
+            font-size: 30px;
+            margin-top: 20px;
+
+        }
+
+        .form {
+            background-color: #5D5D5D;
+            padding: 20px;
+            margin-top: 30px;
+            border-radius: 10px;
+        }
+
+        .form form {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+
+        }
+
+        .form form label {
+            font-size: 15px;
+            margin-top: 15px;
+        }
+
+        .form form label:first-child {
+            margin-top: 0;
+        }
+
+        /* Submit button */
+        .form form input[type=submit] {
+            background: linear-gradient(90deg, #00B292, #7ED957);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 1000px;
+            color: #FFF;
+            font-size: 15px;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+
+        .form form input[type=submit]:hover {
+            transform: scale(1.1);
+            border: 1px solid #FFF;
+        }
+
+        /* Input text, url, password et select */
+        .form form input[type=text],
+        .form form input[type=url],
+        .form form input[type=password],
+        .form form input[type=time],
+        .form form select {
+            background-color: #FFF;
+            border: 1px solid #BABABA;
+            padding: 5px 10px;
+            border-radius: 1000px;
+            font-size: 15px;
+            margin-top: 5px;
+        }
+
+        .form form input[type=url] {
+            width: 100%;
+        }
+    </style>
+    <h1>Configuration WiFi</h1>
+    <p class="Error_message" style="color : red;"></p>
+    <div class="form">
+        <form action="/submit" method="post">
+            <label for="ssid">SSID :</label>
+            <input type="text" id="ssid" name="ssid" value="eduroam">
+
+            <label for="security">Securité :</label>
+            <select id="security" name="security" onchange="toggleUsernameField()">
+                <option value=0>WPA-Personal</option>
+                <option value=0>WPA2-Personal</option>
+                <option value=1>WPA2-Enterprise</option>
+                <option value=0>WPA3-Personal</option>
+                <option value=1>WPA3-Enterprise</option>
+            </select>
+
+            <div id="usernameField" style="display:none;">
+                <label for="username">Nom d'utilisateur:</label>
+                <input type="text" id="username" name="username" value="rfreitas">
+            </div>
+
+            <label for="password">Mot de passe du WiFi :</label>
+            <input type="password" id="password" name="password" value="w?qfbgpht4W-mx66">
+
+            <label for="saName">Nom du SA (entre 7 et 15 caractères) :</label>
+            <input type="text" id="saName" name="saName" minlength="7" maxlength="15" value="ESP-011">
+
+            <label for="roomName">Nom de la salle :</label>
+            <input type="text" minlength="2" minlength="15" id="roomName" name="roomName" value="D001">
+            
+            <label for="heure_demarrage">Heure de démarrage du boitier :</label>
+            <input type="time" id="heure_demarrage" name="heure_demarrage" value="08:20">
+
+            <label for="heure_arret">Heure d'extinction du boitier :</label>
+            <input type="time" id="heure_arret" name="heure_arret" value="20:30">
+
+            <label for="interval">Temps entre chaque envoi (minutes) :</label>
+            <input type="range" id="interval" name="interval" min="5" step="5" max="60" value="5"
+                oninput="updateTimeCycle(this.value)">
+            <p><span id="timeCycleDisplay">5</span> minutes.</p>
+
+            <label for="numCaptures">Nombre de captures (min 2 - max 15) :</label>
+            <input type="range" id="numCaptures" name="numCaptures" min="2" max="15" value="4"
+                oninput="updateNumCapture(this.value)">
+            <p><span id="numCaptureDisplay">4</span> capture(s) par cycle.</p>
+
+            <label for="reconnectTime">Temps entre chaque tentative de reconnexion (secondes) :</label>
+            <input type="range" id="reconnectTime" name="reconnectTime" step="10" min="10" max="300" value="10"
+                oninput="updateReconnectTime(this.value)">
+            <p><span id="reconnectTimeDisplay">10</span> secondes</p>
+
+            <label for="apiUrl">URL de l'API :</label>
+            <input type="url" id="apiUrl" name="apiUrl" value="https://sae34.k8s.iut-larochelle.fr/api/captures">
+            <input type="submit" value="Enregistrer" class="button">
+        </form>
+    </div>
+    <script>
+        function updateNumCapture(value) {
+            document.getElementById('numCaptureDisplay').innerText = value;
+        }
+        function updateTimeCycle(value) {
+            document.getElementById('timeCycleDisplay').innerText = value;
+        }
+        function updateReconnectTime(value) {
+            document.getElementById('reconnectTimeDisplay').innerText = value;
+        }
+        function toggleUsernameField() {
+            var securityType = document.getElementById("security").value;
+            var usernameField = document.getElementById("usernameField");
+            if (securityType === "1") {
+                usernameField.style.display = "block";
+            } else {
+                usernameField.style.display = "none";
+            }
+        }
+    </script>
+</body>
+
+</html>
